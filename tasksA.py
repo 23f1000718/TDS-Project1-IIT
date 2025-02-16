@@ -8,6 +8,8 @@ import os
 import requests
 from scipy.spatial.distance import cosine
 from dotenv import load_dotenv
+from fastapi import HTTPException
+import re
 
 load_dotenv()
 
@@ -166,30 +168,33 @@ def A8(filename='/data/credit_card.txt', image_path='/data/credit_card.png'):
         file.write(card_number)
 # A8()
 
-
-
 def get_embedding(text):
+    # Read the API key from the environment variable
+    api_key = os.getenv("AI_PROXY_TOKEN")
+    if not api_key:
+        raise ValueError("API key not found in environment variable 'AI_PROXY_TOKEN'")
+
+    url = "https://api.openai.com/v1/embeddings"
     headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {AIPROXY_TOKEN}"
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
     }
     data = {
-        "model": "text-embedding-3-small",
-        "input": [text]
+        "input": text,
+        "model": "text-embedding-ada-002"
     }
-    response = requests.post("http://aiproxy.sanand.workers.dev/openai/v1/embeddings", headers=headers, data=json.dumps(data))
-    response.raise_for_status()
-    return response.json()["data"][0]["embedding"]
+    response = requests.post(url, headers=headers, json=data)
+    response.raise_for_status()  # Raises an error for non-200 responses
+    return response.json()['data'][0]['embedding']
 
 def A9(filename='/data/comments.txt', output_filename='/data/comments-similar.txt'):
-    # Read comments
+    # Read comments from file
     with open(filename, 'r') as f:
         comments = [line.strip() for line in f.readlines()]
 
     # Get embeddings for all comments
     embeddings = [get_embedding(comment) for comment in comments]
 
-    # Find the most similar pair
     min_distance = float('inf')
     most_similar = (None, None)
 

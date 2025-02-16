@@ -15,3 +15,4 @@ faker
 pillow
 markdown
 scipy
+faker
