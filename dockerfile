@@ -14,10 +14,10 @@ RUN pip install fastapi uvicorn
 ENV PATH="/root/.local/bin:$PATH"
 
 # Set up the application directory
-WORKDIR /app
+WORKDIR /TDS-Project1-IIT
 
 # Copy application files
-COPY app.py /app
+COPY app.py /TDS-Project1-IIT/app.py
 
 # Explicitly set the correct binary path and use `sh -c`
 CMD ["/root/.local/bin/uv", "run", "app.py"]
